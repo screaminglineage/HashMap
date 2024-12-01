@@ -120,7 +120,7 @@ void str_lower(char *str) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
     HashMap hm = {
         .entries = calloc(HASHMAP_INIT_CAP, sizeof(HashEntry)),
         .size = 0,
@@ -129,7 +129,20 @@ int main() {
         .hash_fn = hash_str
     };
 
-    char *text = read_to_str("text.txt");
+    if (argc < 1) {
+        printf("Not Enought Arguments\n");
+        printf("usage: <program> <text-file>\n");
+        return 1;
+    }
+
+    char *program_name = argv[0];
+    if (argc < 2) {
+        printf("usage: %s <text-file>\n", program_name);
+        printf("<text-file> - lists out word frequencies based on the file, only supports one line of text for now");
+        return 1;
+    }
+
+    char *text = read_to_str(argv[1]);
     text[strcspn(text, "\r\n")] = 0;
     char *word = strtok(text, " ");
     while (word) {
