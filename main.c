@@ -3,57 +3,13 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
-
-#define HASHMAP_INIT_CAP 256
-
-/*
-#define hashmap_insert(map, k, v)                                               \
-do {                                                                            \
-    if (hashmap_get((map), (k), NULL)) return;                                  \
-    assert((map).size < (map)->capacity && "TODO: hasmap doesnt auto-grow");     \
-    size_t i = hash((k));                                                       \
-    while((map).entries[i].occupied) i = (i + 1) % (map).capacity;              \
-    (map)->entries[i] = (HashEntry){(k), (v), true};                              \
-    (map)->size += 1;                                                            \
-} while (0)
-*/
-
-
-#define hashmap_entry(map, k, v)\
-do {\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    size_t j = (i == 0)? (map)->capacity - 1: i - 1;\
-    while (i != j && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
-        i = (i+1)%(map)->capacity;\
-    assert((map)->size < (map)->capacity && "TODO: hashmap doesnt auto-grow");\
-    if (!(map)->entries[i].occupied) {\
-        (map)->entries[i].key = (k);\
-        (map)->entries[i].occupied = true;\
-        (map)->size++;\
-    }\
-    *(v) = &(map)->entries[i].value;\
-} while (0);\
-
-
-#define hashmap_items(map, fn, ...)\
-do {\
-    for (size_t i = 0; i < (map)->capacity; i++) {\
-        if ((map)->entries[i].occupied) {\
-            fn(__VA_ARGS__, (map)->entries[i].key, (map)->entries[i].value);\
-        }\
-    }\
-} while (0);\
-
-
-typedef int (*hashmap_eq_fn)(const char *a, const char *b);
-typedef size_t (*hashmap_hash_fn)(const char *a);
+#include "hashmap.h"
 
 typedef struct {
     const char *key;
     int value;
     bool occupied;
 } HashEntry;
-
 
 typedef struct {
     HashEntry *entries;
@@ -62,6 +18,7 @@ typedef struct {
     hashmap_eq_fn eq_fn;
     hashmap_hash_fn hash_fn;
 } HashMap;
+
 
 size_t hash_str(const char *str) {
     size_t hash = 5381;
@@ -73,23 +30,10 @@ size_t hash_str(const char *str) {
     return hash;
 }
 
-char *read_to_str(char* filepath) {
-    FILE* file = fopen(filepath, "r");
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    rewind(file);
-
-    char* data = malloc(size + 1);
-    fread(data, size, 1, file);
-    fclose(file);
-
-    data[size] = 0;
-    return data;
-}
-
 int hash_entry_cmp(const void *a, const void *b) {
     return ((HashEntry *)b)->value - ((HashEntry *)a)->value;
 }
+
 
 int hashmap_example() {
     HashMap hm = {
@@ -119,6 +63,20 @@ void str_lower(char *str) {
     }
 }
 
+char *read_to_str(char* filepath) {
+    FILE* file = fopen(filepath, "r");
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char* data = malloc(size + 1);
+    fread(data, size, 1, file);
+    fclose(file);
+
+    data[size] = 0;
+    return data;
+}
+
 
 int main(int argc, char *argv[]) {
     HashMap hm = {
@@ -138,7 +96,7 @@ int main(int argc, char *argv[]) {
     char *program_name = argv[0];
     if (argc < 2) {
         printf("usage: %s <text-file>\n", program_name);
-        printf("<text-file> - lists out word frequencies based on the file, only supports one line of text for now");
+        printf("<text-file> - lists out word frequencies based on the file, only supports one line of text for now\n");
         return 1;
     }
 
@@ -164,6 +122,7 @@ int main(int argc, char *argv[]) {
     }
 
     qsort(entries, hm.size, sizeof(HashEntry), hash_entry_cmp);
+    printf("Words sorted by frequency:\n");
     for (size_t i = 0; i < hm.size; i++) {
         printf("Word: `%s`, Count: %d\n", entries[i].key, entries[i].value);
     }
