@@ -7,6 +7,9 @@
 
 #define HASHMAP_INIT_CAP 128
 
+// TODO: Add deletion function (maybe returns the HashEntry itself, 
+// though that may allow accidental modification of the key which is bad)
+
 // Get an "entry" into a particular value by key.
 // The value is returned by pointer.
 // NOTE: The pointer set by this function is temporary and 
