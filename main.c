@@ -5,6 +5,9 @@
 #include <string.h>
 #include "hashmap.h"
 
+typedef int (*hashmap_eq_fn)(const char *a, const char *b);
+typedef size_t (*hashmap_hash_fn)(const char *a);
+
 typedef struct {
     const char *key;
     int value;
@@ -20,6 +23,7 @@ typedef struct {
 } HashMap;
 
 
+// djb2 hash algorithm from http://www.cse.yorku.ca/~oz/hash.html
 size_t hash_str(const char *str) {
     size_t hash = 5381;
     int c;
@@ -32,27 +36,6 @@ size_t hash_str(const char *str) {
 
 int hash_entry_cmp(const void *a, const void *b) {
     return ((HashEntry *)b)->value - ((HashEntry *)a)->value;
-}
-
-
-int hashmap_example() {
-    HashMap hm = {
-        .entries = calloc(HASHMAP_INIT_CAP, sizeof(HashEntry)),
-        .size = 0,
-        .capacity = HASHMAP_INIT_CAP,
-        .eq_fn = strcmp,
-        .hash_fn = hash_str
-    };
-
-    const char *k = "hello";
-    int *v = NULL;
-    hashmap_entry(&hm, k, &v);
-    *v = 123;
-
-    int *v2;
-    hashmap_entry(&hm, k, &v2);
-    printf("%d\n", *v2);
-    return 0;
 }
 
 void str_lower(char *str) {
@@ -79,16 +62,12 @@ char *read_to_str(char* filepath) {
 
 
 int main(int argc, char *argv[]) {
-    HashMap hm = {
-        .entries = calloc(HASHMAP_INIT_CAP, sizeof(HashEntry)),
-        .size = 0,
-        .capacity = HASHMAP_INIT_CAP,
-        .eq_fn = strcmp,
-        .hash_fn = hash_str
-    };
+    HashMap hm = {0};
+    hm.eq_fn = strcmp;
+    hm.hash_fn = hash_str;
 
     if (argc < 1) {
-        printf("Not Enought Arguments\n");
+        printf("Not Enough Arguments\n");
         printf("usage: <program> <text-file>\n");
         return 1;
     }
@@ -102,6 +81,7 @@ int main(int argc, char *argv[]) {
 
     char *text = read_to_str(argv[1]);
     text[strcspn(text, "\r\n")] = 0;
+
     char *word = strtok(text, " ");
     while (word) {
         int *count;
@@ -126,6 +106,8 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < hm.size; i++) {
         printf("Word: `%s`, Count: %d\n", entries[i].key, entries[i].value);
     }
+    printf("--------------------\n\n");
+    printf("Final Size: %zu, Final Capacity %zu\n", hm.size, hm.capacity);
 
     printf("\n");
     return 0;
