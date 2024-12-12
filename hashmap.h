@@ -8,9 +8,11 @@
 #define HASHMAP_INIT_CAP 256
 
 // TODO: rehash existing keys when hashmap grows
+// TODO: check if hashmap_insert and hashmap_update work correctly
+// TODO: make hashmap_grow which autogrows the hashmap into a separate macro
 
-// Get an "entry" into a particular value by key.
-// The value is returned by pointer.
+// Get a pointer into a particular value by key.
+// The key is inserted if it doesnt exist
 // NOTE: The pointer set by this function is temporary and 
 // should not be used after another insert into the hashmap.
 // If required, the value should be copied to the user's scope.
@@ -36,8 +38,50 @@ do {\
 } while (0);\
 
 
-// Get a key from the hashmap
-// If the key doesnt exist then value is set to NULL
+// Insert a key-value pair into the hashmap
+// Does nothing if the key already exists, use hashmap_entry to update an existing key
+#define hashmap_insert(map, k, v)\
+do {\
+    if ((map)->size >= (map)->capacity) {\
+        (map)->capacity = (map)->capacity == 0? HASHMAP_INIT_CAP: (map)->capacity * 2;\
+        void *mem = calloc((map)->capacity, sizeof(HashEntry));\
+        if ((map)->capacity > HASHMAP_INIT_CAP) memcpy(mem, (map)->entries, (map)->size*sizeof(HashEntry));\
+        void *tmp = (map)->entries;\
+        (map)->entries = mem;\
+        free(tmp);\
+    }\
+    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    while ((map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
+        i = (i+1)%(map)->capacity;\
+    if (!(map)->entries[i].occupied) {\
+        (map)->entries[i].key = (k);\
+        (map)->entries[i].value = (v);\
+        (map)->entries[i].occupied = true;\
+        (map)->size++;\
+    }\
+} while (0);\
+
+
+// Update the value of an already-existing key in the hashmap
+// Does nothing if the key doesnt exist
+#define hashmap_update(map, k, v)\
+do {\
+    if ((map)->capacity == 0) break;\
+    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    size_t n = 0;\
+    while (n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) {\
+        i = (i+1)%(map)->capacity;\
+        n++;\
+    }\
+    if (n < (map)->capacity && (map)->entries[i].occupied)\
+        (map)->entries[i].value = (v);\
+} while (0);\
+
+
+// Get the value for the corresponding key from the hashmap
+// Value is passed by pointer and is set to NULL for a non-existant key
+// NOTE: Similarly to hashmap_entry, the pointer to the value shouldnt
+// be used after another insert into the hashmap
 #define hashmap_get(map, k, v)\
 do {\
     if ((map)->capacity == 0) break;\
