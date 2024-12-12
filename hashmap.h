@@ -26,8 +26,7 @@ do {\
         free(tmp);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    size_t j = (i == 0)? (map)->capacity - 1: i - 1;\
-    while (i != j && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
+    while ((map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
         i = (i+1)%(map)->capacity;\
     if (!(map)->entries[i].occupied) {\
         (map)->entries[i].key = (k);\
