@@ -47,28 +47,37 @@ int main() {
     hm.eq_fn = strcmp;
     hm.hash_fn = hash_str;
 
-    // Insert
-    const char *k = "hello";
+    // Get or Insert
     int *v = NULL;
-    hashmap_entry(&hm, k, &v);
+    hashmap_entry(&hm, "hello", &v);
     *v = 123;
+    hashmap_entry(&hm, "world", &v);
+    *v = 234;
+    hashmap_entry(&hm, "a", &v);
+    *v = 212;
+    hashmap_entry(&hm, "b", &v);
+    *v = 239;
 
     // Get
-    int *v2 = NULL;
-    hashmap_entry(&hm, k, &v2);
-    if (v2 != NULL)
-        printf("Value: %d\n", *v2);
+    int *get = NULL;
+    hashmap_get(&hm, "b", &get);
+    if (get != NULL) 
+        printf("Got: %d\n", *get);
+    else
+        printf("Key `b` wasnt found\n");
 
-
-    hashmap_entry(&hm, "world", &v2);
-    *v2 = 234;
-    hashmap_entry(&hm, "a", &v2);
-    *v2 = 212;
-    hashmap_entry(&hm, "b", &v2);
-    *v2 = 239;
-
-    hashmap_remove(&hm, k);
+    // Remove
     hashmap_remove(&hm, "b");
+    printf("Removed b\n");
+
+    hashmap_get(&hm, "b", &get);
+    if (get != NULL)
+        printf("Got: %d\n", *get);
+    else
+        printf("Key `b` wasnt found\n");
+
+    // Iteration
+    hashmap_items(&hm, printf, "(%s: %d)\n");
 
     return 0;
 }
