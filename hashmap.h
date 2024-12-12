@@ -5,10 +5,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define HASHMAP_INIT_CAP 4
+#define HASHMAP_INIT_CAP 256
 
 // TODO: rehash existing keys when hashmap grows
-// (same key is entered twice currently when it regrows and same key hashes to a different index)
+// (same key is entered twice currently, when it grows and the key hashes to a different index)
 // TODO: make hashmap_grow which autogrows the hashmap into a separate macro
 
 // Get a pointer into a particular value by key.
