@@ -5,10 +5,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define HASHMAP_INIT_CAP 256
+#define HASHMAP_INIT_CAP 4
 
 // TODO: rehash existing keys when hashmap grows
-// TODO: check if hashmap_insert and hashmap_update work correctly
+// (same key is entered twice currently when it regrows and same key hashes to a different index)
 // TODO: make hashmap_grow which autogrows the hashmap into a separate macro
 
 // Get a pointer into a particular value by key.
@@ -39,7 +39,8 @@ do {\
 
 
 // Insert a key-value pair into the hashmap
-// Does nothing if the key already exists, use hashmap_entry to update an existing key
+// Does nothing if the key already exists, use hashmap_update to update an existing key,
+// or hashmap_entry to insert and also get a pointer to the value
 #define hashmap_insert(map, k, v)\
 do {\
     if ((map)->size >= (map)->capacity) {\
