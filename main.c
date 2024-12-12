@@ -91,11 +91,6 @@ int main(int argc, char *argv[]) {
         word = strtok(NULL, " ");
     }
 
-    printf("Size: %zu\n", hm.size);
-    printf("HashMap Entries:\n");
-    hashmap_items(&hm, printf, "Key: `%s`, Value: %d\n");
-    printf("--------------------\n\n");
-
     HashEntry entries[hm.size];
     for (size_t i = 0, j = 0; i < hm.capacity; i++) {
         if (hm.entries[i].occupied) entries[j++] = hm.entries[i];
