@@ -59,6 +59,17 @@ int main() {
     if (v2 != NULL)
         printf("Value: %d\n", *v2);
 
+
+    hashmap_entry(&hm, "world", &v2);
+    *v2 = 234;
+    hashmap_entry(&hm, "a", &v2);
+    *v2 = 212;
+    hashmap_entry(&hm, "b", &v2);
+    *v2 = 239;
+
+    hashmap_remove(&hm, k);
+    hashmap_remove(&hm, "b");
+
     return 0;
 }
 

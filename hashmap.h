@@ -5,10 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define HASHMAP_INIT_CAP 128
-
-// TODO: Add deletion function (maybe returns the HashEntry itself, 
-// though that may allow accidental modification of the key which is bad)
+#define HASHMAP_INIT_CAP 256
 
 // Get an "entry" into a particular value by key.
 // The value is returned by pointer.
@@ -35,6 +32,23 @@ do {\
     }\
     *(v) = &(map)->entries[i].value;\
 } while (0);\
+
+// Remove a key from the hashmap
+// Calling remove on a non-existant key does nothing
+#define hashmap_remove(map, k)\
+do {\
+    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    size_t n = 0;\
+    while (n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) {\
+        i = (i+1)%(map)->capacity;\
+        n++;\
+    }\
+    if (n < (map)->capacity) {\
+        (map)->entries[i].occupied = false;\
+        (map)->size--;\
+    }\
+} while (0);\
+
 
 
 // call a function (such as fprintf) on each element of the hashmap
