@@ -7,6 +7,8 @@
 
 #define HASHMAP_INIT_CAP 256
 
+// TODO: rehash existing keys when hashmap grows
+
 // Get an "entry" into a particular value by key.
 // The value is returned by pointer.
 // NOTE: The pointer set by this function is temporary and 
