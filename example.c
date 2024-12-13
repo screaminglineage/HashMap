@@ -47,16 +47,15 @@ int main() {
     hm.eq_fn = strcmp;
     hm.hash_fn = hash_str;
 
-    // Get or Insert
+    // Insert and Update
     int *v = NULL;
     hashmap_entry(&hm, "hello", &v);
     *v = 123;
     hashmap_entry(&hm, "world", &v);
     *v = 234;
-    hashmap_entry(&hm, "a", &v);
-    *v = 212;
-    hashmap_entry(&hm, "b", &v);
-    *v = 239;
+    hashmap_insert(&hm, "a", 212);
+    hashmap_insert(&hm, "b", 239);
+    hashmap_update(&hm, "b", 190);
 
     // Get
     int *get = NULL;
