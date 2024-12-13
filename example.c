@@ -20,7 +20,7 @@ typedef struct {
 
 
 // djb2 hash algorithm from http://www.cse.yorku.ca/~oz/hash.html
-size_t hash_str(const char *str) {
+size_t djb2(const char *str) {
     size_t hash = 5381;
     int c;
 
@@ -38,16 +38,16 @@ HashMap example_init() {
         .size = 0,
         .capacity = HASHMAP_INIT_CAP,
         .eq_fn = strcmp,
-        .hash_fn = hash_str
+        .hash_fn = djb2
     };
 }
 
 int main() {
     HashMap hm = {0};
     hm.eq_fn = strcmp;
-    hm.hash_fn = hash_str;
+    hm.hash_fn = djb2;
 
-    // Insert and Update
+    // Insert
     int *v = NULL;
     hashmap_entry(&hm, "hello", &v);
     *v = 123;
@@ -55,6 +55,16 @@ int main() {
     *v = 234;
     hashmap_insert(&hm, "a", 212);
     hashmap_insert(&hm, "b", 239);
+
+    // Insert or Modify
+    hashmap_entry(&hm, "a", &v);
+    *v = 29;
+
+    // Insert or Get
+    hashmap_entry(&hm, "world", &v);
+    printf("Got: %d\n", *v);
+
+    // Update
     hashmap_update(&hm, "b", 190);
 
     // Get

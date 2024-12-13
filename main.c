@@ -24,7 +24,7 @@ typedef struct {
 
 
 // djb2 hash algorithm from http://www.cse.yorku.ca/~oz/hash.html
-size_t hash_str(const char *str) {
+size_t djb2_hash(const char *str) {
     size_t hash = 5381;
     int c;
 
@@ -64,7 +64,7 @@ char *read_to_str(char* filepath) {
 int main(int argc, char *argv[]) {
     HashMap hm = {0};
     hm.eq_fn = strcmp;
-    hm.hash_fn = hash_str;
+    hm.hash_fn = djb2_hash;
 
     if (argc < 1) {
         printf("Not Enough Arguments\n");
