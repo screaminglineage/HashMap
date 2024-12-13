@@ -3,12 +3,12 @@
 A Hashmap implemented in C using macros to mimic a generic data structure. Simply include hashmap.h and use the functions.
 
 ```c
-hashmap_entry(HashMap, KeyType, ValueType **);
-hashmap_insert(HashMap, KeyType, ValueType);
-hashmap_update(HashMap, KeyType, ValueType);
-hashmap_get(HashMap, KeyType, ValueType);
-hashmap_remove(HashMap, KeyType);
-hashmap_items(HashMap, Function, ...);
+hashmap_entry(HashMap *, KeyType, ValueType **);
+hashmap_insert(HashMap *, KeyType, ValueType);
+hashmap_update(HashMap *, KeyType, ValueType);
+hashmap_get(HashMap *, KeyType, ValueType);
+hashmap_remove(HashMap *, KeyType);
+hashmap_items(HashMap *, Function, ...);
 ```
 
 The core HashMap structure as well as a HashEntry structure (key, value and occupied) needs to be defined, along with a hash function and an equality function.
