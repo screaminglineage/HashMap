@@ -3,7 +3,7 @@
 A Hashmap implemented in C using macros to mimic a generic data structure. Simply include hashmap.h and use the functions.
 
 ```c
-hashmap_entry(HashMap, KeyType, ValueType *);
+hashmap_entry(HashMap, KeyType, ValueType **);
 hashmap_insert(HashMap, KeyType, ValueType);
 hashmap_update(HashMap, KeyType, ValueType);
 hashmap_get(HashMap, KeyType, ValueType);
