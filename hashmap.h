@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define HASHMAP_INIT_CAP 256
+#define HASHMAP_LOAD_FACTOR 0.75
 
 // Grow the hashmap and rehash all the keys into the new allocation
 #define hashmap_grow(map)\
@@ -36,7 +37,7 @@ do {\
 // If required, the value should be copied to the user's scope.
 #define hashmap_entry(map, k, v)\
 do {\
-    if ((map)->size >= (map)->capacity * 0.75) {\
+    if ((map)->size >= (map)->capacity * HASHMAP_LOAD_FACTOR) {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
@@ -56,7 +57,7 @@ do {\
 // or hashmap_entry to insert and also get a pointer to the value
 #define hashmap_insert(map, k, v)\
 do {\
-    if ((map)->size >= (map)->capacity * 0.75) {\
+    if ((map)->size >= (map)->capacity * HASHMAP_LOAD_FACTOR) {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
