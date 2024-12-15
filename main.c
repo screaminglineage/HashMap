@@ -46,6 +46,32 @@ void str_lower(char *str) {
     }
 }
 
+typedef struct {
+    char *str;
+    size_t begin;
+    size_t end;
+} Tokenizer;
+
+
+bool next(Tokenizer *tk, char **next) {
+    while (tk->str[tk->end] != 0 && (tk->str[tk->end] == ' ' || tk->str[tk->end] == '\n' || tk->str[tk->end] == '\r')) {
+        tk->end++;
+    }
+    if (tk->str[tk->end] == 0) return false;
+
+    tk->begin = tk->end;
+    while (tk->str[tk->end] != 0 && (tk->str[tk->end] != ' ' && tk->str[tk->end] != '\n' && tk->str[tk->end] != '\r')) {
+        tk->end++;
+    }
+    if (tk->str[tk->end] == 0 && tk->end - tk->begin == 0) return false;
+
+    *next = &tk->str[tk->begin];
+    tk->str[tk->end++] = 0;
+    tk->begin = tk->end;
+    return true;
+}
+
+
 char *read_to_str(char* filepath) {
     FILE* file = fopen(filepath, "r");
     fseek(file, 0, SEEK_END);
@@ -75,20 +101,18 @@ int main(int argc, char *argv[]) {
     char *program_name = argv[0];
     if (argc < 2) {
         printf("usage: %s <text-file>\n", program_name);
-        printf("<text-file> - lists out word frequencies based on the file, only supports one line of text for now\n");
+        printf("<text-file> - lists out word frequencies based on the file\n");
         return 1;
     }
 
     char *text = read_to_str(argv[1]);
-    text[strcspn(text, "\r\n")] = 0;
+    Tokenizer tk = { .str = text };
 
-    char *word = strtok(text, " ");
-    while (word) {
+    char *word = NULL;
+    while (next(&tk, &word)) {
         int *count;
-        str_lower(word);
         hashmap_entry(&hm, word, &count);
         *count += 1;
-        word = strtok(NULL, " ");
     }
 
     HashEntry entries[hm.size];
