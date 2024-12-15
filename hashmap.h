@@ -11,25 +11,20 @@
 // Grow the hashmap and rehash all the keys into the new allocation
 #define hashmap_grow(map)\
 do {\
-    if ((map)->capacity == 0) {\
-        (map)->capacity = HASHMAP_INIT_CAP;\
-        (map)->entries = calloc((map)->capacity, sizeof(HashEntry));\
-        assert((map)->entries && "hashmap_grow failed: Out of memory!");\
-    } else {\
-        size_t old_cap = (map)->capacity;\
-        (map)->capacity *= 2;\
-        HashEntry *mem = calloc((map)->capacity, sizeof(HashEntry));\
-        assert(mem && "hashmap_grow failed: Out of memory!");\
-        for (size_t j = 0; j < old_cap; j++) {\
-            size_t i = (map)->hash_fn((map)->entries[j].key) % (map)->capacity;\
-            while (mem[i].occupied && (map)->eq_fn(mem[i].key, (map)->entries[j].key) != 0)\
-                i = (i + 1) % (map)->capacity;\
-            mem[i] = (map)->entries[j];\
-        }\
-        void *tmp = (map)->entries;\
-        (map)->entries = mem;\
-        free(tmp);\
+    size_t old_cap = (map)->capacity;\
+    (map)->capacity = ((map)->capacity == 0)? HASHMAP_INIT_CAP: (map)->capacity*2;\
+    HashEntry *mem = calloc((map)->capacity, sizeof(HashEntry));\
+    assert(mem && "hashmap_grow failed: Out of memory!");\
+    for (size_t j = 0; j < old_cap; j++) {\
+        if (!(map)->entries[j].occupied) continue;\
+        size_t i = (map)->hash_fn((map)->entries[j].key) % (map)->capacity;\
+        while (mem[i].occupied && (map)->eq_fn(mem[i].key, (map)->entries[j].key) != 0)\
+            i = (i + 1) % (map)->capacity;\
+        mem[i] = (map)->entries[j];\
     }\
+    void *tmp = (map)->entries;\
+    (map)->entries = mem;\
+    free(tmp);\
 } while(0)
 
 
@@ -41,7 +36,7 @@ do {\
 // If required, the value should be copied to the user's scope.
 #define hashmap_entry(map, k, v)\
 do {\
-    if ((map)->size >= (map)->capacity) {\
+    if ((map)->size >= (map)->capacity * 0.75) {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
@@ -61,7 +56,7 @@ do {\
 // or hashmap_entry to insert and also get a pointer to the value
 #define hashmap_insert(map, k, v)\
 do {\
-    if ((map)->size >= (map)->capacity) {\
+    if ((map)->size >= (map)->capacity * 0.75) {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
