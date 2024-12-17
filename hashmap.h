@@ -9,6 +9,9 @@
 #define HASHMAP_INIT_CAP 256
 #define HASHMAP_LOAD_FACTOR 0.75
 
+// TODO: check if quadratic probing works correctly for all the operations
+
+
 // Grow the hashmap and rehash all the keys into the new allocation
 #define hashmap_grow(map)\
 do {\
@@ -18,8 +21,8 @@ do {\
     assert(mem && "hashmap_grow failed: Out of memory!");\
     for (size_t j = 0; j < old_cap; j++) {\
         if (!(map)->entries[j].occupied) continue;\
-        size_t i = (map)->hash_fn((map)->entries[j].key) % (map)->capacity;\
-        for (int q = 1; mem[i].occupied; i = (i + q*q) % (map)->capacity, q++);\
+        size_t i = (map)->hash_fn((map)->entries[j].key) & ((map)->capacity - 1);\
+        for (int q = 1; mem[i].occupied; i = (i + q*q) & ((map)->capacity - 1), q++);\
         mem[i] = (map)->entries[j];\
     }\
     void *tmp = (map)->entries;\
@@ -39,8 +42,8 @@ do {\
     if ((map)->size >= (map)->capacity * HASHMAP_LOAD_FACTOR) {\
         hashmap_grow(map);\
     }\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++);\
+    size_t i = (map)->hash_fn((k)) & ((map)->capacity - 1);\
+    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) & ((map)->capacity - 1), q++);\
     if (!(map)->entries[i].occupied) {\
         (map)->entries[i].key = (k);\
         (map)->entries[i].occupied = true;\
@@ -58,8 +61,8 @@ do {\
     if ((map)->size >= (map)->capacity * HASHMAP_LOAD_FACTOR) {\
         hashmap_grow(map);\
     }\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++);\
+    size_t i = (map)->hash_fn((k)) & ((map)->capacity - 1);\
+    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) & ((map)->capacity - 1), q++);\
     if (!(map)->entries[i].occupied) {\
         (map)->entries[i].key = (k);\
         (map)->entries[i].value = (v);\
@@ -74,9 +77,9 @@ do {\
 #define hashmap_update(map, k, v)\
 do {\
     if ((map)->capacity == 0) break;\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    size_t i = (map)->hash_fn((k)) & ((map)->capacity - 1);\
     size_t n = 0;\
-    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) & ((map)->capacity - 1), q++, n++);\
     if (n < (map)->capacity && (map)->entries[i].occupied)\
         (map)->entries[i].value = (v);\
 } while (0)
@@ -89,9 +92,9 @@ do {\
 #define hashmap_get(map, k, v)\
 do {\
     if ((map)->capacity == 0) break;\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    size_t i = (map)->hash_fn((k)) & ((map)->capacity - 1);\
     size_t n = 0;\
-    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) & ((map)->capacity - 1), q++, n++);\
     *(v) = (n < (map)->capacity && (map)->entries[i].occupied)? &(map)->entries[i].value: NULL;\
 } while (0)
 
@@ -106,9 +109,9 @@ do {\
 #define hashmap_remove(map, k)\
 do {\
     if ((map)->capacity == 0) break;\
-    size_t i = (map)->hash_fn((k)) % (map)->capacity;\
+    size_t i = (map)->hash_fn((k)) & ((map)->capacity - 1);\
     size_t n = 0;\
-    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) & ((map)->capacity - 1), q++, n++);\
     if (n < (map)->capacity && (map)->entries[i].occupied) {\
         (map)->entries[i].occupied = false;\
         (map)->size--;\
