@@ -110,6 +110,7 @@ int main(int argc, char *argv[]) {
 
     char *word = NULL;
     while (next(&tk, &word)) {
+        str_lower(word);
         int *count;
         hashmap_entry(&hm, word, &count);
         *count += 1;
