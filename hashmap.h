@@ -19,8 +19,7 @@ do {\
     for (size_t j = 0; j < old_cap; j++) {\
         if (!(map)->entries[j].occupied) continue;\
         size_t i = (map)->hash_fn((map)->entries[j].key) % (map)->capacity;\
-        while (mem[i].occupied && (map)->eq_fn(mem[i].key, (map)->entries[j].key) != 0)\
-            i = (i + 1) % (map)->capacity;\
+        while (mem[i].occupied) i = (i + 1) % (map)->capacity;\
         mem[i] = (map)->entries[j];\
     }\
     void *tmp = (map)->entries;\
