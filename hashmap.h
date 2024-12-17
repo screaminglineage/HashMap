@@ -19,7 +19,7 @@ do {\
     for (size_t j = 0; j < old_cap; j++) {\
         if (!(map)->entries[j].occupied) continue;\
         size_t i = (map)->hash_fn((map)->entries[j].key) % (map)->capacity;\
-        while (mem[i].occupied) i = (i + 1) % (map)->capacity;\
+        for (int q = 1; mem[i].occupied; i = (i + q*q) % (map)->capacity, q++);\
         mem[i] = (map)->entries[j];\
     }\
     void *tmp = (map)->entries;\
@@ -40,8 +40,7 @@ do {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    while ((map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
-        i = (i+1)%(map)->capacity;\
+    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++);\
     if (!(map)->entries[i].occupied) {\
         (map)->entries[i].key = (k);\
         (map)->entries[i].occupied = true;\
@@ -60,8 +59,7 @@ do {\
         hashmap_grow(map);\
     }\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
-    while ((map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) \
-        i = (i+1)%(map)->capacity;\
+    for (int q = 1; (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++);\
     if (!(map)->entries[i].occupied) {\
         (map)->entries[i].key = (k);\
         (map)->entries[i].value = (v);\
@@ -78,17 +76,14 @@ do {\
     if ((map)->capacity == 0) break;\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
     size_t n = 0;\
-    while (n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) {\
-        i = (i+1)%(map)->capacity;\
-        n++;\
-    }\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
     if (n < (map)->capacity && (map)->entries[i].occupied)\
         (map)->entries[i].value = (v);\
 } while (0)
 
 
 // Get the value for the corresponding key from the hashmap
-// Value is passed by pointer and is set to NULL for a non-existant key
+// Value is passed by pointer and is set to NULL for a non-existent key
 // NOTE: Similarly to hashmap_entry, the pointer to the value shouldnt
 // be used after another insert into the hashmap
 #define hashmap_get(map, k, v)\
@@ -96,10 +91,7 @@ do {\
     if ((map)->capacity == 0) break;\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
     size_t n = 0;\
-    while (n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) {\
-        i = (i+1)%(map)->capacity;\
-        n++;\
-    }\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
     *(v) = (n < (map)->capacity && (map)->entries[i].occupied)? &(map)->entries[i].value: NULL;\
 } while (0)
 
@@ -116,10 +108,7 @@ do {\
     if ((map)->capacity == 0) break;\
     size_t i = (map)->hash_fn((k)) % (map)->capacity;\
     size_t n = 0;\
-    while (n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0) {\
-        i = (i+1)%(map)->capacity;\
-        n++;\
-    }\
+    for (int q = 1; n < (map)->capacity && (map)->entries[i].occupied && (map)->eq_fn((map)->entries[i].key, (k)) != 0; i = (i + q*q) % (map)->capacity, q++, n++);\
     if (n < (map)->capacity && (map)->entries[i].occupied) {\
         (map)->entries[i].occupied = false;\
         (map)->size--;\
