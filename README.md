@@ -1,6 +1,6 @@
 # HashMap
 
-A Hashmap implemented in C using macros to mimic a generic data structure. Simply include hashmap.h and use the functions.
+A Hashmap with open-addressing and quadratic probing implemented in C using macros to mimic a generic data structure. Simply include hashmap.h and use the functions.
 
 ```cpp
 hashmap_entry(HashMap *, KeyType, ValueType **);
